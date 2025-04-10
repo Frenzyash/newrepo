@@ -1,0 +1,115 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
+    - name: Update dependency graph
+      uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
+      # Use Node.js official image
+FROM node:18
+
+# Set working directory in the container
+WORKDIR /app
+
+# Copy frontend code into the container
+COPY . .
+
+# Install project dependencies
+RUN npm install
+
+# Build the React app for production
+RUN npm run build
+
+# Install a static file server to serve the built app
+RUN npm install -g serve
+
+# Expose React app port
+EXPOSE 3000
+
+# Command to start the React app in production mode
+CMD ["serve", "-s", "build"]
+
+# Use the official Python 3.10 image as the base
+FROM python:3.10
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy all backend files into the container
+COPY . .
+
+# Install Python dependencies from requirements.txt
+RUN pip install -r requirements.txt
+
+# Expose the Flask port (default is 5000)
+EXPOSE 5000
+
+# Command to run the Flask app
+CMD ["python", "app.py"]
+# Use Maven image to build the app
+FROM maven:3.9.4-eclipse-temurin-17 AS build
+
+# Set working directory
+WORKDIR /app
+
+# Copy the project files
+COPY . .
+
+# Package the application
+RUN mvn clean package -DskipTests
+
+# Use a minimal JDK image to run the app
+FROM eclipse-temurin:17-jdk-alpine
+
+# Set working directory in the final image
+WORKDIR /app
+
+# Copy only the built jar from the previous stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Run the app
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+version: "3"
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
