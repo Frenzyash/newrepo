@@ -1,17 +1,13 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-name: Prettier Code Formatter
+name: Node.js CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  format:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,16 +17,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '18'
 
       - name: Install dependencies
         run: npm install
-
-      - name: Run Prettier
-        run: npx prettier --write .
-
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "chore: format code with Prettier"
-          branch: main
