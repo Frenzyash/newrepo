@@ -21,10 +21,6 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
-    # Run Prettier
-    - name: Format Code
-      run: npx prettier --write "**/*.{js,jsx,ts,tsx,json,css,md}"
-
     # Commit changes
     - name: Commit Changes
       run: |
