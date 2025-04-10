@@ -20,7 +20,6 @@ jobs:
     # Install dependencies
     - name: Install Dependencies
       run: npm install
-
     # Commit changes
     - name: Commit Changes
       run: |
