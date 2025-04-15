@@ -30,9 +30,8 @@ jobs:
       run: npm run build
 
   deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    firebase deploy --token $FIREBASE_TOKEN
+    netlify deploy
 
     steps:
     - name: Checkout code
